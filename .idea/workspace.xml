@@ -4,7 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c67e1e77-e713-4b91-984c-2308a73a5c47" name="更改" comment="首次提交" />
+    <list default="true" id="c67e1e77-e713-4b91-984c-2308a73a5c47" name="更改" comment="首次提交">
+      <change beforePath="$PROJECT_DIR$/deployment/deploy-static.sh" beforeDir="false" afterPath="$PROJECT_DIR$/deployment/deploy-static.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/components/AIChatResponsive.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/components/AIChatResponsive.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/config/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/config/api.js" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -38,7 +42,7 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "dev",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
