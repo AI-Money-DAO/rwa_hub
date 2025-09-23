@@ -18,6 +18,7 @@ export default function Home() {
     if (searchQuery.trim()) {
       setChatInitialQuery(searchQuery);
       setIsChatOpen(true);
+      setSearchQuery(''); // 清空搜索框
     }
   };
 
@@ -35,12 +36,12 @@ export default function Home() {
   };
 
   return (
-    <main 
-      className="min-h-screen bg-black text-white relative overflow-hidden transition-all duration-300"
-      style={{
-        paddingRight: typeof window !== 'undefined' && isChatOpen && window.innerWidth >= 1024 ? `${sidebarWidth}px` : '0'
-      }}
-    >
+    <>
+      <main 
+        className={`min-h-screen bg-black text-white relative overflow-hidden transition-all duration-300 ${
+          isChatOpen ? 'hidden' : ''
+        }`}
+      >
       {/* Background Elements */}
       <ParticleSystem />
       <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-black to-blue-900/20 animate-pulse"></div>
@@ -92,7 +93,7 @@ export default function Home() {
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="地产RWA有哪些公司..."
+                  placeholder="输入您的问题..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyPress={handleKeyPress}
@@ -234,7 +235,7 @@ export default function Home() {
             {/* 关于我们 */}
             <div className="rounded-2xl p-6 md:p-8 text-center" style={{background: 'linear-gradient(180deg, #F6E9D5 0%, #DDC8A3 100%)'}}>
               <div className="w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6" style={{background: 'linear-gradient(180deg, #F6E9D5 0%, #DDC8A3 100%)'}}>
-                <svg className="w-6 h-6 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-8 h-8 md:w-10 md:h-10 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
@@ -247,7 +248,7 @@ export default function Home() {
             {/* RWA活动 */}
             <div className="rounded-2xl p-6 md:p-8 text-center" style={{background: 'linear-gradient(180deg, #F6E9D5 0%, #DDC8A3 100%)'}}>
               <div className="w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6" style={{background: 'linear-gradient(180deg, #F6E9D5 0%, #DDC8A3 100%)'}}>
-                <svg className="w-6 h-6 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-8 h-8 md:w-10 md:h-10 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
@@ -260,7 +261,7 @@ export default function Home() {
             {/* 共享空间 */}
             <div className="rounded-2xl p-6 md:p-8 text-center" style={{background: 'linear-gradient(180deg, #F6E9D5 0%, #DDC8A3 100%)'}}>
               <div className="w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6" style={{background: 'linear-gradient(180deg, #F6E9D5 0%, #DDC8A3 100%)'}}>
-                <svg className="w-6 h-6 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-8 h-8 md:w-10 md:h-10 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
@@ -273,7 +274,7 @@ export default function Home() {
             {/* 获得能量值 */}
             <div className="rounded-2xl p-6 md:p-8 text-center" style={{background: 'linear-gradient(180deg, #F6E9D5 0%, #DDC8A3 100%)'}}>
               <div className="w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6" style={{background: 'linear-gradient(180deg, #F6E9D5 0%, #DDC8A3 100%)'}}>
-                <svg className="w-6 h-6 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-8 h-8 md:w-10 md:h-10 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
               </div>
@@ -325,15 +326,17 @@ export default function Home() {
         <div className="absolute top-2/3 left-10 w-4 h-4 bg-purple-400 rounded-full animate-ping opacity-40" style={{ animationDelay: '3s', animationDuration: '4s' }}></div>
       </section>
 
-      {/* AI Chat Component */}
-      <AIChatResponsive 
-        isOpen={isChatOpen} 
-        onClose={() => {
-          setIsChatOpen(false);
-          setChatInitialQuery('');
-        }} 
-        initialQuery={chatInitialQuery}
-      />
     </main>
+
+    {/* AI Chat Component - 移出main元素避免被隐藏 */}
+    <AIChatResponsive 
+      isOpen={isChatOpen} 
+      onClose={() => {
+        setIsChatOpen(false);
+        setChatInitialQuery('');
+      }} 
+      initialQuery={chatInitialQuery}
+    />
+  </>
   );
 }

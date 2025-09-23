@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { apiConfig, setServer } from '../config/api';
-import { apiClient } from '../utils/apiClient';
-import { chatService } from '../services/chatService';
+import apiClient from '../utils/apiClient';
+import chatService from '../services/chatService';
 
 export default function ApiConfigDemo() {
   const [currentConfig, setCurrentConfig] = useState(null);
