@@ -182,11 +182,11 @@ export NODE_ENV=production
 export NEXT_PUBLIC_APP_NAME="RWA Hub"
 export NEXT_PUBLIC_API_BASE_URL="${API_BASE_URL}"
 export NEXT_PUBLIC_ENABLE_MOCK_API="false"
-export PORT=3002
+export PORT=3000
 
 print_success "✅ RWA Hub 准备完成！"
 print_info "🌐 启动服务器..."
-print_info "📋 访问地址: http://localhost:3002"
+print_info "📋 访问地址: http://localhost:3000"
 print_info "🛑 按 Ctrl+C 停止服务"
 
 # 启动 Next.js 生产服务器
