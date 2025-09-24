@@ -1,8 +1,23 @@
 // API配置文件 - 支持开发环境和生产环境切换
 
+// 获取环境变量中的API地址，如果没有则使用默认值
+const getDefaultApiUrl = () => {
+  // 优先使用环境变量
+  if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_API_BASE_URL) {
+    return process.env.NEXT_PUBLIC_API_BASE_URL;
+  }
+  // 服务端渲染时也要检查环境变量
+  if (process.env.NEXT_PUBLIC_API_BASE_URL) {
+    return process.env.NEXT_PUBLIC_API_BASE_URL;
+  }
+  // 最后使用默认值（开发环境）
+  // return 'http://127.0.0.1:2026';
+  return 'http://www.ce182.com';
+};
+
 // API配置管理 - 简化版本，使用URL配置
 const defaultConfig = {
-  url: 'http://127.0.0.1:2026',
+  url: getDefaultApiUrl(),
   timeout: 30000, // 增加到30秒，适应流式请求
   retryAttempts: 3
 };
