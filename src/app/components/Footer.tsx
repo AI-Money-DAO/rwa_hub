@@ -3,9 +3,9 @@ import Image from 'next/image';
 export default function Footer() {
   return (
     <footer className="bg-white border-t border-[#d9d9d9]">
-      <div className="box-border content-start flex items-center justify-between pb-[160px] pt-[32px] px-[32px] size-full">
-        {/* Logo */}
-        <div className="flex items-center">
+      <div className="box-border content-start flex items-end justify-between pb-[40px] pt-[32px] px-[32px] size-full relative">
+        {/* Logo - moved more to top-left */}
+        <div className="flex items-center absolute top-[20px] left-[20px]">
           <Image
             src="/rwa-logo.svg"
             alt="RWA Hub Logo"
@@ -15,8 +15,8 @@ export default function Footer() {
           />
         </div>
         
-        {/* QR Codes */}
-        <div className="flex space-x-6">
+        {/* QR Codes - moved to bottom center, slightly up */}
+        <div className="flex space-x-6 mx-auto mb-[5px]">
           <div className="text-center">
             <div className="w-20 h-20 bg-white border border-gray-300 rounded-lg flex items-center justify-center mb-2 p-2">
               <Image
@@ -44,10 +44,7 @@ export default function Footer() {
           </div>
         </div>
         
-        {/* Copyright */}
-        <div className="text-sm text-gray-500">
-          © 2025 RWA Hub
-        </div>
+
       </div>
     </footer>
   );

@@ -43,23 +43,20 @@ export default function Home() {
         }`}
       >
       {/* Background Elements */}
-      <ParticleSystem />
       <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-black to-blue-900/20 animate-pulse"></div>
       <div className="absolute top-20 left-20 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl animate-bounce" style={{ animationDuration: '4s' }}></div>
       <div className="absolute bottom-20 right-20 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '3s' }}></div>
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-radial from-purple-500/5 to-transparent rounded-full animate-spin" style={{ animationDuration: '20s' }}></div>
       
-      {/* Floating Geometric Shapes */}
-      <div className="absolute top-1/4 left-1/4 w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-500 rotate-45 animate-bounce opacity-70" style={{ animationDelay: '0s', animationDuration: '3s' }}></div>
-      <div className="absolute top-3/4 right-1/4 w-6 h-6 bg-gradient-to-r from-green-400 to-blue-500 rounded-full animate-pulse opacity-60" style={{ animationDelay: '1s', animationDuration: '2.5s' }}></div>
-      <div className="absolute top-1/3 right-1/3 w-4 h-4 bg-gradient-to-r from-pink-400 to-purple-500 rotate-12 animate-bounce opacity-50" style={{ animationDelay: '2s', animationDuration: '4s' }}></div>
-      <div className="absolute bottom-1/3 left-1/3 w-10 h-2 bg-gradient-to-r from-cyan-400 to-teal-500 animate-pulse opacity-40" style={{ animationDelay: '0.5s', animationDuration: '3.5s' }}></div>
+
       
       {/* Hero Background Image - Extended to cover entire page */}
       <div 
-        className="absolute inset-0 bg-center bg-cover bg-no-repeat"
+        className="absolute inset-0 bg-center bg-no-repeat"
         style={{ 
-          backgroundImage: `url('/hero-background.png')`
+          backgroundImage: `url('/hero-background.png')`,
+          backgroundSize: 'cover',
+          backgroundAttachment: 'fixed'
         }}
       ></div>
       
@@ -80,7 +77,7 @@ export default function Home() {
                 textAlign: 'center'
               }}
             >
-              RWA Hub——你的RWA AI助手
+              RWA Hub｜你的RWA AI助手
             </span>
           </h1>
           <p className="text-lg md:text-xl text-gray-300 mb-8 md:mb-12 px-4">
@@ -313,17 +310,6 @@ export default function Home() {
             </button>
           </div>
         </div>
-
-        {/* Decorative Elements */}
-        <div className="absolute top-20 left-20 w-4 h-4 bg-green-500 rounded-full opacity-60 animate-ping"></div>
-        <div className="absolute bottom-32 right-32 w-6 h-6 bg-yellow-400 rounded-full opacity-40 animate-bounce" style={{ animationDelay: '0.5s', animationDuration: '2s' }}></div>
-        <div className="absolute top-1/3 right-20 w-3 h-3 bg-green-400 rounded-full opacity-50 animate-pulse" style={{ animationDelay: '1s', animationDuration: '1.5s' }}></div>
-        <div className="absolute bottom-20 left-1/4 w-5 h-5 bg-yellow-300 rounded-full opacity-30 animate-ping" style={{ animationDelay: '2s', animationDuration: '3s' }}></div>
-        
-        {/* Additional Floating Elements */}
-        <div className="absolute top-10 right-10 w-2 h-2 bg-cyan-400 rounded-full animate-bounce opacity-70" style={{ animationDelay: '0.2s', animationDuration: '2.5s' }}></div>
-        <div className="absolute bottom-10 left-10 w-3 h-3 bg-pink-400 rounded-full animate-pulse opacity-50" style={{ animationDelay: '1.5s', animationDuration: '2s' }}></div>
-        <div className="absolute top-2/3 left-10 w-4 h-4 bg-purple-400 rounded-full animate-ping opacity-40" style={{ animationDelay: '3s', animationDuration: '4s' }}></div>
       </section>
 
     </main>
