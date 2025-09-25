@@ -96,20 +96,18 @@ export default function CommunityPage() {
             </div>
 
             {/* Right Content - 3D Illustration */}
-            <div className="flex justify-center items-center order-2 lg:order-2">
+            <div className="flex justify-center items-center order-2 lg:order-2 lg:h-full lg:min-h-screen lg:py-16">
               <div className="relative w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg">
                 {/* 3D Earth with Buildings Illustration */}
                 <div className="relative">
                   {/* Main Earth Globe */}
                   <div className="w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 lg:w-72 lg:h-72 xl:w-80 xl:h-80 mx-auto relative">
                     {/* Earth Base - replaced with sq.png */}
-                    <div className="w-full h-full relative overflow-hidden shadow-2xl" style={{ backgroundColor: '#E9E9E9' }}>
-                      <img 
-                        src="/sq.png" 
-                        alt="RWA Hub" 
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
+                    <img 
+                      src="/sq.png" 
+                      alt="RWA Hub" 
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                 </div>
               </div>

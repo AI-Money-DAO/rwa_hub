@@ -252,14 +252,14 @@ export default function AIChatResponsive({ isOpen, onClose, initialQuery }: AICh
       </div>
 
       {/* 聊天区域 */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-3 space-y-3">
         {messages.map((message) => (
           <div
             key={message.id}
             className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`max-w-[85%] p-3 rounded-lg ${
+              className={`max-w-[95%] p-3 rounded-lg ${
                 message.type === 'user'
                   ? 'bg-yellow-500 text-black'
                   : 'bg-gray-700 text-white'
@@ -279,7 +279,7 @@ export default function AIChatResponsive({ isOpen, onClose, initialQuery }: AICh
       </div>
 
       {/* 输入区域 */}
-      <div className="p-4 bg-gray-800 border-t border-gray-700">
+      <div className="p-3 bg-gray-800 border-t border-gray-700">
         <div className="flex space-x-2">
           <input
             ref={inputRef}
@@ -310,10 +310,10 @@ export default function AIChatResponsive({ isOpen, onClose, initialQuery }: AICh
       {/* 头部 */}
       <div className="flex items-center justify-between p-4 border-b border-gray-700 bg-gray-900">
         <h2 className="text-lg font-semibold text-white">RWA AI 助手</h2>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
           <button
             onClick={startNewConversation}
-            className="text-gray-400 hover:text-white transition-colors"
+            className="text-gray-400 hover:text-white transition-colors flex items-center justify-center"
             title="开始新对话"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -322,18 +322,18 @@ export default function AIChatResponsive({ isOpen, onClose, initialQuery }: AICh
           </button>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors"
-            title="返回主页"
+            className="text-gray-400 hover:text-white transition-colors flex items-center justify-center -translate-y-1"
+            title="收起对话框"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7" />
             </svg>
           </button>
         </div>
       </div>
 
       {/* 聊天区域 */}
-      <div className="flex-1 overflow-y-auto p-6 bg-gradient-to-br from-black via-gray-900 to-black relative">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden p-6 bg-gradient-to-br from-black via-gray-900 to-black relative">
         {/* 背景装饰 - 调整为金色主题 */}
         <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-yellow-500/5 to-amber-500/5 pointer-events-none"></div>
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl animate-pulse pointer-events-none"></div>
@@ -376,8 +376,8 @@ export default function AIChatResponsive({ isOpen, onClose, initialQuery }: AICh
                 <div key={index} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'} animate-slide-in`}>
                   {message.type === 'user' ? (
                     // 用户消息：直接显示文字
-                    <div className="max-w-[80%] text-right">
-                      <div className="text-white/90 text-sm leading-relaxed whitespace-pre-wrap mb-1">
+                    <div className="max-w-[95%] text-right">
+                      <div className="text-white/90 text-sm leading-relaxed break-words whitespace-pre-wrap mb-1">
                         {message.content}
                       </div>
                       <div className="text-white/50 text-xs">
@@ -386,19 +386,23 @@ export default function AIChatResponsive({ isOpen, onClose, initialQuery }: AICh
                     </div>
                     ) : (
                     // AI消息：保持原有的头像和气泡样式
-                    <div className="flex max-w-[80%] items-start space-x-3">
-                      {/* AI头像 */}
-                      <div className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg flex-shrink-0 bg-gradient-to-br from-amber-700 via-yellow-500 to-amber-700">
-                        <div className="w-10 h-10 rounded-full flex items-center justify-center bg-gradient-to-br from-white/20 to-white/5 backdrop-blur-sm">
-                          <svg className="w-6 h-6 text-white drop-shadow-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    <div className="flex max-w-[95%] items-start">
+                      {/* AI头像 - 可点击收起 */}
+                      <button 
+                        onClick={onClose}
+                        className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg flex-shrink-0 bg-gradient-to-br from-amber-700 via-yellow-500 to-amber-700 -ml-2 hover:from-amber-800 hover:via-yellow-600 hover:to-amber-800 transition-all duration-300 cursor-pointer"
+                        title="收起对话框"
+                      >
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gradient-to-br from-white/20 to-white/5 backdrop-blur-sm">
+                          <svg className="w-5 h-5 text-white drop-shadow-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7" />
                           </svg>
                         </div>
-                      </div>
+                      </button>
                       
                       {/* AI消息气泡 */}
                       <div className="rounded-2xl px-5 py-4 shadow-lg transition-all duration-300 hover:shadow-xl backdrop-blur-sm bg-gray-800/90 text-white border border-gray-700/50">
-                        <div className="text-sm leading-relaxed whitespace-pre-wrap font-medium">{message.content}</div>
+                        <div className="text-sm leading-relaxed break-words whitespace-pre-wrap font-medium">{message.content}</div>
                         <div className="text-xs mt-3 font-medium text-amber-300/70">
                           {message.timestamp.toLocaleTimeString()}
                         </div>
@@ -414,7 +418,7 @@ export default function AIChatResponsive({ isOpen, onClose, initialQuery }: AICh
       </div>
 
       {/* 输入区域 */}
-      <div className="p-6 border-t border-gray-700/50 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 backdrop-blur-sm">
+      <div className="p-6 border-t border-gray-700/50 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 backdrop-blur-sm overflow-x-hidden">
         <div className="max-w-4xl mx-auto">
           <div className="flex gap-4 items-center">
             <div className="flex-1 relative">
@@ -425,11 +429,11 @@ export default function AIChatResponsive({ isOpen, onClose, initialQuery }: AICh
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="输入您的问题..."
-                className="w-full bg-gradient-to-r from-gray-800/80 to-gray-700/80 text-white placeholder-gray-400 rounded-2xl px-6 py-4 pr-12 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:bg-gray-700/90 text-lg border border-gray-600/30 shadow-lg backdrop-blur-sm transition-all duration-300 hover:shadow-xl hover:border-amber-500/50"
+                className="w-full bg-gradient-to-r from-gray-800/80 to-gray-700/80 text-white placeholder-gray-400 rounded-xl px-4 py-3 pr-10 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:bg-gray-700/90 text-base backdrop-blur-sm transition-all duration-300"
                 disabled={isLoading}
               />
               {/* 输入框装饰 */}
-              <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
                 <div className="w-2 h-2 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full animate-pulse"></div>
               </div>
             </div>

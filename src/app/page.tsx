@@ -15,11 +15,10 @@ export default function Home() {
   // 处理搜索栏的AI问答
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      setChatInitialQuery(searchQuery);
-      setIsChatOpen(true);
-      setSearchQuery(''); // 清空搜索框
-    }
+    // 移除输入框验证，即使没有输入内容也可以进入AI对话
+    setChatInitialQuery(searchQuery.trim()); // 如果有内容就传递，没有就传递空字符串
+    setIsChatOpen(true);
+    setSearchQuery(''); // 清空搜索框
   };
 
   // 处理快速问题点击
@@ -94,24 +93,25 @@ export default function Home() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  className="w-full px-4 md:px-8 py-4 md:py-6 bg-white border border-gray-300 rounded-2xl text-gray-800 placeholder-gray-500 focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/50 shadow-lg text-base md:text-lg pr-20 md:pr-24"
+                  className="w-full px-4 md:px-8 py-8 md:py-10 pb-14 md:pb-18 bg-white border border-gray-300 rounded-2xl text-gray-800 placeholder-gray-500 focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/50 shadow-lg text-base md:text-lg"
                 />
-                <div className="absolute right-3 md:right-6 top-1/2 transform -translate-y-1/2 flex items-center space-x-2 md:space-x-3">
+                {/* 按钮放在输入框内部右下方 */}
+                <div className="absolute bottom-3 md:bottom-4 right-3 md:right-4 flex items-center space-x-2 md:space-x-3">
                   <button 
                     type="button"
-                    className="p-1.5 md:p-2 hover:bg-gray-100 rounded transition-colors"
+                    className="p-2 md:p-3 hover:bg-gray-100 rounded-full transition-colors"
                     title="语音输入"
                   >
-                    <svg className="w-5 h-5 md:w-6 md:h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-7 h-7 md:w-8 md:h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                     </svg>
                   </button>
                   <button 
                     type="submit"
-                    className="p-1.5 md:p-2 hover:bg-gray-100 rounded transition-colors"
+                    className="p-2 md:p-3 hover:bg-gray-100 rounded-full transition-colors"
                     title="开始AI问答"
                   >
-                    <svg className="w-5 h-5 md:w-6 md:h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-7 h-7 md:w-8 md:h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
                   </button>

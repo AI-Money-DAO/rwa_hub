@@ -3,8 +3,8 @@ import Image from 'next/image';
 export default function Footer() {
   return (
     <footer className="bg-white border-t border-[#d9d9d9]">
-      <div className="box-border content-start flex items-end justify-between pb-[40px] pt-[32px] px-[32px] size-full relative">
-        {/* Logo - moved more to top-left */}
+      <div className="box-border content-start flex flex-col pb-[40px] pt-[32px] px-[32px] size-full relative min-h-[140px]">
+        {/* Logo - always at top-left */}
         <div className="flex items-center absolute top-[20px] left-[20px]">
           <Image
             src="/rwa-logo.svg"
@@ -15,15 +15,15 @@ export default function Footer() {
           />
         </div>
         
-        {/* QR Codes - moved to bottom center, slightly up */}
-        <div className="flex space-x-6 mx-auto mb-[5px]">
+        {/* QR Codes - centered at bottom, with enough top margin to avoid overlap */}
+        <div className="flex space-x-6 justify-center mt-[60px]">
           <div className="text-center">
-            <div className="w-20 h-20 bg-white border border-gray-300 rounded-lg flex items-center justify-center mb-2 p-2">
+            <div className="w-28 h-28 bg-white border border-gray-300 rounded-lg flex items-center justify-center mb-2 p-2">
               <Image
                 src="/wechat-qr.png"
                 alt="微信公众号二维码"
-                width={64}
-                height={64}
+                width={96}
+                height={96}
                 className="w-full h-full object-contain"
               />
             </div>
@@ -31,12 +31,12 @@ export default function Footer() {
           </div>
           
           <div className="text-center">
-            <div className="w-20 h-20 bg-white border border-gray-300 rounded-lg flex items-center justify-center mb-2 p-2">
+            <div className="w-28 h-28 bg-white border border-gray-300 rounded-lg flex items-center justify-center mb-2 p-2">
               <Image
                 src="/wechat-qr.png"
                 alt="微信群二维码"
-                width={64}
-                height={64}
+                width={96}
+                height={96}
                 className="w-full h-full object-contain"
               />
             </div>
