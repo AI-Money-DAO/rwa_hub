@@ -168,7 +168,21 @@ class ApiClient {
   // 流式请求（用于聊天）- 优化版本
   async streamRequest(endpoint, data = {}, onChunk, options = {}) {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), this.config.getConfig().timeout);
+    let isTimeoutAbort = false; // 标记是否是超时导致的中断
+    let isGracefulAbort = false; // 标记是否是优雅中止
+    
+    // 如果传入了外部的AbortSignal，监听它
+    if (options.signal) {
+      options.signal.addEventListener('abort', () => {
+        isGracefulAbort = true; // 标记为优雅中止
+        controller.abort();
+      });
+    }
+    
+    const timeoutId = setTimeout(() => {
+      isTimeoutAbort = true; // 标记为超时中断
+      controller.abort();
+    }, this.config.getConfig().timeout);
 
     try {
       const response = await fetch(this.buildUrl(endpoint), {
@@ -264,7 +278,18 @@ class ApiClient {
       clearTimeout(timeoutId);
       
       if (error.name === 'AbortError') {
-        throw new Error(`流式请求超时，超过 ${this.config.getConfig().timeout}ms 未收到响应`);
+        if (isTimeoutAbort) {
+          // 真正的超时
+          throw new Error(`流式请求超时，超过 ${this.config.getConfig().timeout}ms 未收到响应`);
+        } else if (isGracefulAbort) {
+          // 优雅中止，创建一个特殊的错误类型
+          const gracefulAbortError = new Error('Request gracefully aborted');
+          gracefulAbortError.name = 'GracefulAbortError';
+          throw gracefulAbortError;
+        } else {
+          // 用户主动停止，直接抛出AbortError，让上层处理
+          throw error;
+        }
       }
       
       if (error.message.includes('network error') || error.message.includes('fetch')) {

@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import AIChatResponsive from './components/AIChatResponsive';
+import { presetAnswers } from '../utils/presetAnswers.js';
 import ParticleSystem from './components/ParticleSystem';
 
 export default function Home() {
@@ -23,7 +24,8 @@ export default function Home() {
 
   // 处理快速问题点击
   const handleQuickQuestion = (question: string) => {
-    setChatInitialQuery(question);
+    const presetAnswer = presetAnswers[question as keyof typeof presetAnswers];
+    setChatInitialQuery(JSON.stringify({ question, presetAnswer }));
     setIsChatOpen(true);
   };
 
@@ -149,7 +151,7 @@ export default function Home() {
               RWA和传统融资有什么区别？
             </button>
             <button 
-              onClick={() => handleQuickQuestion('企业出海时，如何利用RWA提升融资效率？')}
+              onClick={() => handleQuickQuestion('RWA融资，是属于偏债权融资还是偏股权融资？')}
               className="px-4 md:px-6 py-2.5 md:py-3 bg-gray-800/80 hover:bg-gray-700/80 border border-gray-600 rounded-full transition-all shadow-lg backdrop-blur-sm text-sm md:text-base"
               style={{
                 fontFamily: 'Inter',
@@ -159,7 +161,7 @@ export default function Home() {
                 color: '#D9D9D9'
               }}
             >
-              企业出海时，如何利用RWA提升融资效率？
+              RWA融资，是属于偏债权融资还是偏股权融资？
             </button>
           </div>
         </div>

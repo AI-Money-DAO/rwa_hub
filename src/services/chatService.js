@@ -5,6 +5,17 @@ import { API_ENDPOINTS } from '../config/api.js';
 class ChatService {
   constructor() {
     this.client = apiClient;
+    this.currentAbortController = null; // 用于中断当前请求
+  }
+
+  /**
+   * 中断当前的流式请求
+   */
+  abortCurrentRequest() {
+    if (this.currentAbortController) {
+      this.currentAbortController.abort();
+      this.currentAbortController = null;
+    }
   }
 
   /**
@@ -60,13 +71,21 @@ class ChatService {
     onError 
   }) {
     try {
+      // 如果有正在进行的请求，先中断它
+      if (this.currentAbortController) {
+        this.currentAbortController.abort();
+      }
+      
+      // 创建新的AbortController
+      this.currentAbortController = new AbortController();
+      
       let fullContent = '';
       let finalConversationId = conversationId;
       
       // 使用防抖机制来优化频繁的UI更新
       let updateTimer = null;
       let pendingContent = '';
-      
+
       const debouncedUpdate = (content, fullText, convId) => {
         pendingContent = content;
         
@@ -101,6 +120,11 @@ class ChatService {
         },
         async (chunk) => {
           try {
+            // 检查是否被中断
+            if (this.currentAbortController?.signal.aborted) {
+              return;
+            }
+            
             if (chunk.type === 'message_delta') {
               fullContent += chunk.content;
               finalConversationId = chunk.conversation_id || finalConversationId;
@@ -148,14 +172,26 @@ class ChatService {
               await onError(error);
             }
           }
+        },
+        {
+          signal: this.currentAbortController.signal // 传递AbortSignal
         }
       );
     } catch (error) {
+      // 如果是中断错误，不需要调用onError
+      if (error.name === 'AbortError' || error.name === 'GracefulAbortError') {
+        console.log('Stream request was aborted');
+        return;
+      }
+      
       if (onError) {
         await onError(error);
       } else {
         throw error;
       }
+    } finally {
+      // 清理AbortController
+      this.currentAbortController = null;
     }
   }
 

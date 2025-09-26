@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import chatService from '../../services/chatService.js';
+import { matchQuestion } from '../../utils/presetAnswers.js';
 import './animations.css';
 
 interface Message {
@@ -24,6 +25,8 @@ export default function AIChatResponsive({ isOpen, onClose, initialQuery }: AICh
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false); // 新增：正在生成状态
+  const [currentTypingId, setCurrentTypingId] = useState<string | null>(null); // 新增：当前正在打字的消息ID
   const [sidebarWidth, setSidebarWidth] = useState(600);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
@@ -31,6 +34,7 @@ export default function AIChatResponsive({ isOpen, onClose, initialQuery }: AICh
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const resizeRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null); // 新增：打字效果的timeout引用
 
   // 从localStorage加载对话ID和消息历史
   useEffect(() => {
@@ -80,6 +84,31 @@ export default function AIChatResponsive({ isOpen, onClose, initialQuery }: AICh
     }
   };
 
+  // 新增：停止生成函数
+  const stopGeneration = () => {
+    // 中断流式请求
+    chatService.abortCurrentRequest();
+    
+    setIsGenerating(false);
+    setIsLoading(false);
+    setCurrentTypingId(null);
+    
+    // 清除打字效果的timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = null;
+    }
+    
+    // 如果有正在生成的消息，标记为已完成
+    if (currentTypingId) {
+      setMessages(prev => prev.map(msg => 
+        msg.id === currentTypingId 
+          ? { ...msg, isGenerating: false, isLoading: false, isTyping: false }
+          : msg
+      ));
+    }
+  };
+
   // 滚动到底部
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -89,10 +118,27 @@ export default function AIChatResponsive({ isOpen, onClose, initialQuery }: AICh
     scrollToBottom();
   }, [messages]);
 
-  // 初始化时如果有查询，将其设置到输入框中
+  // 初始化时如果有查询，将其设置到输入框中并自动发送
   useEffect(() => {
     if (isOpen && initialQuery) {
-      setInputValue(initialQuery);
+      try {
+        // 尝试解析JSON格式的预设回答
+        const parsedQuery = JSON.parse(initialQuery);
+        if (parsedQuery.question && parsedQuery.presetAnswer) {
+          // 有预设回答的情况
+          setInputValue(parsedQuery.question);
+          // 自动发送问题并显示预设回答
+          setTimeout(() => {
+            handleSendMessageWithPreset(parsedQuery.question, parsedQuery.presetAnswer);
+          }, 100);
+        } else {
+          // 普通查询
+          setInputValue(initialQuery);
+        }
+      } catch (error) {
+        // 不是JSON格式，按普通查询处理
+        setInputValue(initialQuery);
+      }
     }
   }, [isOpen, initialQuery]);
 
@@ -132,6 +178,12 @@ export default function AIChatResponsive({ isOpen, onClose, initialQuery }: AICh
 
   // 调用后端API获取AI流式回复
   const getAIStreamResponse = async (userMessage: string, aiMessageId: string): Promise<void> => {
+    setIsGenerating(true);
+    setCurrentTypingId(aiMessageId);
+    
+    // 使用本地变量来跟踪这次请求的状态
+    let isCurrentRequestActive = true;
+    
     try {
       // 如果没有conversationId，先生成一个临时的用于创建userId
       const tempConversationId = conversationId || Date.now().toString();
@@ -146,6 +198,11 @@ export default function AIChatResponsive({ isOpen, onClose, initialQuery }: AICh
         }],
         conversationId: conversationId || undefined,
         onChunk: async (chunk: any) => {
+          // 检查当前请求是否仍然活跃
+          if (!isCurrentRequestActive) {
+            return;
+          }
+          
           if (chunk.type === 'delta') {
             // 更新AI消息内容
             setMessages(prev => prev.map(msg => 
@@ -156,6 +213,11 @@ export default function AIChatResponsive({ isOpen, onClose, initialQuery }: AICh
           }
         },
         onComplete: async (result: any) => {
+          // 检查当前请求是否仍然活跃
+          if (!isCurrentRequestActive) {
+            return;
+          }
+          
           // 流式响应完成
           setMessages(prev => prev.map(msg => 
             msg.id === aiMessageId 
@@ -163,33 +225,208 @@ export default function AIChatResponsive({ isOpen, onClose, initialQuery }: AICh
               : msg
           ));
           
+          setIsGenerating(false);
+          setCurrentTypingId(null);
+          
           // 更新对话ID
           if (result.conversationId) {
             setConversationId(result.conversationId);
           }
         },
         onError: async (error: any) => {
-          console.error('Stream error:', error);
-          setMessages(prev => prev.map(msg => 
-            msg.id === aiMessageId 
-              ? { ...msg, content: '抱歉，服务暂时不可用，请稍后再试。', isLoading: false, isTyping: false }
-              : msg
-          ));
+          // 检查当前请求是否仍然活跃
+          if (!isCurrentRequestActive) {
+            return;
+          }
+          
+          // 检查是否是用户主动停止的请求
+          if (error.name === 'AbortError' || error.name === 'GracefulAbortError') {
+            // 用户主动停止，不显示错误消息，保持当前内容，也不输出到控制台
+            setMessages(prev => prev.map(msg => 
+              msg.id === aiMessageId 
+                ? { ...msg, isLoading: false, isTyping: false }
+                : msg
+            ));
+          } else {
+            // 真正的服务错误才输出到控制台
+            console.error('Stream error:', error);
+            setMessages(prev => prev.map(msg => 
+              msg.id === aiMessageId 
+                ? { ...msg, content: '抱歉，服务暂时不可用，请稍后再试。', isLoading: false, isTyping: false }
+                : msg
+            ));
+          }
+          setIsGenerating(false);
+          setCurrentTypingId(null);
         }
       });
-    } catch (error) {
-      console.error('AI stream response error:', error);
-      setMessages(prev => prev.map(msg => 
-        msg.id === aiMessageId 
-          ? { ...msg, content: '抱歉，服务暂时不可用，请稍后再试。', isLoading: false, isTyping: false }
-          : msg
-      ));
+    } catch (error: any) {
+      // 检查当前请求是否仍然活跃
+      if (!isCurrentRequestActive) {
+        return;
+      }
+      
+      // 检查是否是用户主动停止的请求
+      if (error.name === 'AbortError' || error.name === 'GracefulAbortError') {
+        // 用户主动停止，不显示错误消息，保持当前内容，也不输出到控制台
+        setMessages(prev => prev.map(msg => 
+          msg.id === aiMessageId 
+            ? { ...msg, isLoading: false, isTyping: false }
+            : msg
+        ));
+      } else {
+        // 真正的服务错误才输出到控制台
+        console.error('AI stream response error:', error);
+        setMessages(prev => prev.map(msg => 
+          msg.id === aiMessageId 
+            ? { ...msg, content: '抱歉，服务暂时不可用，请稍后再试。', isLoading: false, isTyping: false }
+            : msg
+        ));
+      }
+      setIsGenerating(false);
+      setCurrentTypingId(null);
+    } finally {
+      // 标记当前请求为非活跃状态
+      isCurrentRequestActive = false;
+      // 确保清理loading状态
+      setIsLoading(false);
     }
+  };
+
+  // 模拟打字效果的函数
+  const simulateTyping = (text: string, messageId: string) => {
+    console.log('simulateTyping 开始:', { text: text.substring(0, 50) + '...', messageId });
+    
+    // 优化：根据文本长度动态调整输出策略
+    const textLength = text.length;
+    let chunkSize = 1; // 默认单字符输出
+    let interval = 20; // 默认间隔
+    
+    // 根据文本长度优化输出策略 - 长文本和超长文本只提升25%
+    if (textLength > 3000) {
+      // 超超长文本：适度提升25%
+      chunkSize = 2;
+      interval = 15; // 从20ms减少到15ms，提升约25%
+    } else if (textLength > 2000) {
+      // 超长文本：适度提升25%
+      chunkSize = 2;
+      interval = 15; // 从20ms减少到15ms，提升约25%
+    } else if (textLength > 1000) {
+      // 长文本：适度提升25%
+      chunkSize = 1;
+      interval = 15; // 从20ms减少到15ms，提升约25%
+    } else if (textLength > 500) {
+      // 中等文本：保持原有效果
+      chunkSize = 1;
+      interval = 20;
+    } else {
+      // 短文本：保持原有效果
+      chunkSize = 1;
+      interval = 25;
+    }
+    
+    const words = text.split('');
+    let currentIndex = 0;
+    let isTypingActive = true; // 使用局部变量控制打字状态
+    
+    setCurrentTypingId(messageId);
+    setIsGenerating(true);
+    
+    const typeNextChunk = () => {
+      // 检查是否被停止 - 使用局部变量和状态检查
+      if (!isTypingActive) {
+        console.log('打字被停止 (局部变量):', { isTypingActive, messageId });
+        return;
+      }
+      
+      if (currentIndex < words.length) {
+        // 批量输出多个字符以提升速度
+        const endIndex = Math.min(currentIndex + chunkSize, words.length);
+        const currentText = words.slice(0, endIndex).join('');
+        
+        setMessages(prev => prev.map(msg => 
+          msg.id === messageId 
+            ? { ...msg, content: currentText, isTyping: true }
+            : msg
+        ));
+        
+        currentIndex = endIndex;
+        typingTimeoutRef.current = setTimeout(typeNextChunk, interval);
+      } else {
+        // 打字完成
+        console.log('打字完成:', messageId);
+        setMessages(prev => prev.map(msg => 
+          msg.id === messageId 
+            ? { ...msg, isTyping: false }
+            : msg
+        ));
+        setIsGenerating(false);
+        setCurrentTypingId(null);
+        isTypingActive = false;
+      }
+    };
+    
+    // 添加停止打字的清理函数
+    const stopTyping = () => {
+      isTypingActive = false;
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+    
+    // 开始打字
+    typeNextChunk();
+    
+    // 返回停止函数以便外部调用
+    return stopTyping;
+  };
+
+  // 处理带预设回答的消息发送
+  const handleSendMessageWithPreset = async (question: string, presetAnswer: string) => {
+    console.log('handleSendMessageWithPreset 被调用:', { question, presetAnswer });
+    
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      type: 'user',
+      content: question,
+      timestamp: new Date(),
+    };
+
+    console.log('添加用户消息:', userMessage);
+    setMessages(prev => [...prev, userMessage]);
+    setInputValue('');
+
+    // 添加AI回复消息
+    const aiMessageId = (Date.now() + 1).toString();
+    const aiMessage: Message = {
+      id: aiMessageId,
+      type: 'ai',
+      content: '',
+      timestamp: new Date(),
+      isTyping: true,
+    };
+
+    console.log('添加AI消息:', aiMessage);
+    setMessages(prev => [...prev, aiMessage]);
+
+    // 优化：减少初始延迟，让用户更快看到回答开始显示
+    setTimeout(() => {
+      console.log('开始模拟打字效果:', { presetAnswer, aiMessageId });
+      simulateTyping(presetAnswer, aiMessageId);
+    }, 200); // 从500ms减少到200ms
   };
 
   const handleSendMessage = async (messageContent?: string) => {
     const content = messageContent || inputValue.trim();
     if (!content) return;
+
+    // 首先检查是否匹配预设问题
+    const matchedQuestion = matchQuestion(content);
+    if (matchedQuestion) {
+      // 如果匹配到预设问题，使用预设答案
+      handleSendMessageWithPreset(matchedQuestion.question, matchedQuestion.answer);
+      return;
+    }
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -229,7 +466,7 @@ export default function AIChatResponsive({ isOpen, onClose, initialQuery }: AICh
   const quickQuestions = [
     'RWA是什么？',
     'RWA和传统融资有什么区别？',
-    '企业出海时，如何利用RWA提升融资效率？'
+    'RWA融资，是属于偏债权融资还是偏股权融资？'
   ];
 
   // 移动端组件 - 全屏模式
@@ -291,11 +528,11 @@ export default function AIChatResponsive({ isOpen, onClose, initialQuery }: AICh
             className="flex-1 px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:border-yellow-500"
           />
           <button
-            onClick={() => handleSendMessage()}
-            disabled={!inputValue.trim()}
+            onClick={() => isGenerating ? stopGeneration() : handleSendMessage()}
+            disabled={(!inputValue.trim() && !isGenerating)}
             className="px-6 py-2 bg-yellow-500 text-black rounded-lg hover:bg-yellow-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            发送
+            {isGenerating ? '停止' : '发送'}
           </button>
         </div>
       </div>
@@ -358,7 +595,18 @@ export default function AIChatResponsive({ isOpen, onClose, initialQuery }: AICh
                 {quickQuestions.map((question, index) => (
                   <button
                     key={index}
-                    onClick={() => handleSendMessage(question)}
+                    onClick={() => {
+                      console.log('快速问题被点击:', question);
+                      const matchedQuestion = matchQuestion(question);
+                      console.log('匹配结果:', matchedQuestion);
+                      if (matchedQuestion) {
+                        console.log('使用预设答案');
+                        handleSendMessageWithPreset(matchedQuestion.question, matchedQuestion.answer);
+                      } else {
+                        console.log('使用AI回答');
+                        handleSendMessage(question);
+                      }
+                    }}
                     className="p-4 bg-gradient-to-br from-gray-800/80 to-gray-700/80 hover:from-gray-700/90 hover:to-gray-600/90 rounded-xl text-left text-gray-300 hover:text-white transition-all duration-300 border border-amber-600/20 hover:border-amber-500/50 shadow-lg hover:shadow-xl transform hover:scale-105 backdrop-blur-sm animate-slide-up"
                     style={{animationDelay: `${0.4 + index * 0.1}s`}}
                   >
@@ -395,7 +643,7 @@ export default function AIChatResponsive({ isOpen, onClose, initialQuery }: AICh
                       >
                         <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gradient-to-br from-white/20 to-white/5 backdrop-blur-sm">
                           <svg className="w-5 h-5 text-white drop-shadow-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                           </svg>
                         </div>
                       </button>
@@ -438,13 +686,13 @@ export default function AIChatResponsive({ isOpen, onClose, initialQuery }: AICh
               </div>
             </div>
             <button
-              onClick={() => handleSendMessage()}
-              disabled={!inputValue.trim() || isLoading}
+              onClick={() => isGenerating ? stopGeneration() : handleSendMessage()}
+              disabled={(!inputValue.trim() && !isGenerating)}
               className="bg-gradient-to-r from-amber-600 via-yellow-400 to-amber-600 text-white rounded-full p-3 hover:from-amber-700 hover:via-yellow-500 hover:to-amber-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 ring-2 ring-amber-300/20 hover:ring-amber-300/40"
             >
-              {isLoading ? (
-                <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              {isGenerating ? (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 6h12v12H6z" />
                 </svg>
               ) : (
                 <svg className="w-5 h-5 drop-shadow-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
