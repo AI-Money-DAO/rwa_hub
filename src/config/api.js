@@ -121,13 +121,13 @@ export const setServer = (serverUrl) => apiConfig.setServer(serverUrl);
 
 // API端点常量
 export const API_ENDPOINTS = {
-  CHAT: '/api/v1/chat',
-  TEST_CONNECTION: '/api/v1/test/connection',
-  USER_INFO: '/api/v1/user/info',
-  WORKSPACES: '/api/v1/workspaces',
-  CONFIG: '/api/v1/config',
-  CONVERSATIONS: '/api/v1/conversations',
-  USER_CONVERSATIONS: '/api/v1/users',
+  CHAT: '/api/v3/chat',
+  TEST_CONNECTION: '/api/v3/test/connection',
+  USER_INFO: '/api/v3/user/info',
+  WORKSPACES: '/api/v3/workspaces',
+  CONFIG: '/api/v3/config',
+  CONVERSATIONS: '/api/v3/conversations',
+  USER_CONVERSATIONS: '/api/v3/users',
   HEALTH: '/health'
 };
 
